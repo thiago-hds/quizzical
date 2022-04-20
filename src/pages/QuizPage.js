@@ -1,46 +1,60 @@
-import React from 'react';
-import Question from './Question';
+import { useState, useEffect } from 'react';
+import Question from '../components/Question';
 
-function QuizScreen() {
-	const [questions, setQuestions] = React.useState([]);
-	const [isShowingResults, setIsShowingResults] = React.useState(false);
+const API_URL = 'https://opentdb.com/api.php?amount=5&difficulty=medium';
 
-	React.useEffect(() => {
+function QuizPage() {
+	const [questions, setQuestions] = useState([]);
+	const [isShowingResults, setIsShowingResults] = useState(false);
+
+	useEffect(() => {
 		fetchQuestions();
 	}, []);
 
 	async function fetchQuestions() {
-		const res = await fetch(
-			'https://opentdb.com/api.php?amount=5&difficulty=medium'
-		);
+		const res = await fetch(API_URL);
 		const json = await res.json();
+		console.log(json);
 
 		const questionItems = json.results.map((item, index) => {
 			const { question, correct_answer, incorrect_answers } = item;
-			const allAnswers = shuffle([correct_answer, ...incorrect_answers]);
+			const options = [correct_answer, ...incorrect_answers].map(
+				answer => {
+					return {
+						text: answer,
+						isCorrect: answer === correct_answer,
+						isSelected: false,
+					};
+				}
+			);
+			const shuffledOptions = shuffleOptions(options);
 
 			return {
 				id: index, // TODO generate id for question
 				title: question,
-				allAnswers,
-				correctAnswer: correct_answer,
-				playerAnswer: null,
+				options: shuffledOptions,
 			};
 		});
 
 		setQuestions(questionItems);
 	}
 
-	function shuffle(array) {
-		return array.sort(() => Math.random() - 0.5);
+	function shuffleOptions(options) {
+		return options.sort(() => Math.random() - 0.5);
 	}
 
 	function selectAnswerForQuestion(questionId, answer) {
 		setQuestions(oldQuestions => {
 			return oldQuestions.map(question => {
-				return question.id === questionId
-					? { ...question, playerAnswer: answer }
-					: question;
+				if (question.id !== questionId) {
+					return question;
+				}
+
+				const newOptions = question.options.map(option => {
+					return { ...option, isSelected: option.text === answer };
+				});
+
+				return { ...question, options: newOptions };
 			});
 		});
 	}
@@ -66,9 +80,11 @@ function QuizScreen() {
 		);
 	});
 
-	const correctlyAnsweredQuestions = questions.filter(
-		question => question.playerAnswer === question.correctAnswer
-	);
+	const correctlyAnsweredQuestions = questions.filter(question => {
+		return question.options.some(
+			option => option.isCorrect && option.isSelected
+		);
+	});
 
 	const isLoading = questions.length === 0;
 
@@ -99,4 +115,4 @@ function QuizScreen() {
 	);
 }
 
-export default QuizScreen;
+export default QuizPage;

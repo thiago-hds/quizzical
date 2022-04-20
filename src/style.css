@@ -21,6 +21,7 @@ body {
 	background-color: var(--clr-background);
 	background-image: url('./img/blob1.svg'), url('./img/blob2.svg');
 	background-position: top right, bottom left;
+	background-size: 30%;
 	background-repeat: no-repeat;
 }
 

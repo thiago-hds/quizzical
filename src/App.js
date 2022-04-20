@@ -1,15 +1,15 @@
-import React from 'react';
-import StartScreen from './StartScreen';
-import QuizScreen from './QuizScreen';
+import { useState } from 'react';
+import StartPage from './pages/StartPage';
+import QuizPage from './pages/QuizPage';
 
 function App() {
-	const [isPlaying, setIsPlaying] = React.useState(false);
+	const [isPlaying, setIsPlaying] = useState(false);
 
-	function start() {
+	const startGame = () => {
 		setIsPlaying(true);
-	}
+	};
 
-	return isPlaying ? <QuizScreen /> : <StartScreen start={start} />;
+	return isPlaying ? <QuizPage /> : <StartPage startGame={startGame} />;
 }
 
 export default App;
